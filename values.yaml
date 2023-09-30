@@ -1,0 +1,51 @@
+replicaCount: 1
+
+postgres:
+  name: postgres-helm
+  container:
+    image: postgres
+    port: 5432
+  env:
+    
+  service:
+    name: postgres-service-helm
+    type: None
+    port: 5432
+  volume:
+    name: postgres-volume-mount-helm
+    mountPath: /var/lib/postgresql/data
+    pv:
+      name: postgres-pv-helm
+      storage: 4Gi
+      storageClassName: slow
+      volumeMode: Filesystem
+      accessMode: ReadWriteOnce
+      path: "/mnt/helm-data"
+    pvc:
+      name: postgres-pvc-helm
+      accessMode: ReadWriteOnce
+      storage: 3Gi
+  secret:
+    name: postgres-secret-helm
+    type: Opaque
+    data:
+      password: postgres
+
+django:
+  name: django-helm
+  container:
+    image: xvaikum/django-py:v1  
+    port: 8000
+    imagePullPolicy: Always
+  env:
+    secret:
+      name: postgres-secret-helm
+    service:
+      name: postgres-service-helm
+  service:
+    name: django-service-helm
+    protocol: TCP
+    type: LoadBalancer
+    port: 80
+
+
